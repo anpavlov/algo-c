@@ -11,7 +11,6 @@
 #include <assert.h>
 
 // Динамический массив
-template< class T >
 class CArray
 {
 public:
@@ -19,10 +18,10 @@ public:
     ~CArray();
     
     // Добавление элемента в конец массива
-    void Add(T elem);
+    void Add(int elem);
     
     // Оператор индексации
-    T& operator [](int index);
+    int& operator [](int index);
     
     // Получение размера массива
     int GetSize() { return size; }
@@ -32,27 +31,25 @@ private:
     // Расширение массива
     void Reallocate();
     
-    T* buffer;
+    int* buffer;
     int capacity;
     int size;
 };
 
 // Ввод целочисленного массива
-void inputIntArray(CArray<int>& arr);
+void inputIntArray(CArray& arr);
 
 // Сортировка пузырьком
-template< class T >
-void bubbleSort(CArray<T>& arr);
+void bubbleSort(CArray& arr);
 
 // Вывод массива
-template< class T >
-void outputArray(CArray<T>& arr);
+void outputArray(CArray& arr);
 
 //============= MAIN =========================
 
-int abc()
+int adf()
 {
-    CArray<int> arr;
+    CArray arr;
     inputIntArray(arr);
     
     bubbleSort(arr);
@@ -64,7 +61,7 @@ int abc()
 //============================================
 
 // Ввод массива
-void inputIntArray(CArray<int>& arr)
+void inputIntArray(CArray& arr)
 {
     int temp;
     while ( scanf("%d", &temp) == 1 )
@@ -72,27 +69,25 @@ void inputIntArray(CArray<int>& arr)
 }
 
 // Сортировка
-template< class T >
-void bubbleSort(CArray<T>& arr)
+void bubbleSort(CArray& arr)
 {
-    //int swaps = 0;
+    int swaps = 0;
     for ( int i = 0; i < arr.GetSize() - 1; ++i )
     {
-        //swaps = 0;
+        swaps = 0;
         for ( int j = 0; j < arr.GetSize() - i - 1; ++j )
             if ( arr[j] > arr[j + 1] )
             {
                 std::swap(arr[j], arr[j + 1]);
-                //swaps = 1;
+                swaps = 1;
             }
-        //if ( swaps == 0)
-            //break;
+        if ( swaps == 0)
+            break;
     }
 }
 
 // Вывод массива
-template< class T >
-void outputArray(CArray<T>& arr)
+void outputArray(CArray& arr)
 {
     int i = 0;
     for ( i = 0; i < arr.GetSize() - 1; ++i )
@@ -100,33 +95,29 @@ void outputArray(CArray<T>& arr)
     std::cout << arr[i];
 }
 
-template< class T >
-CArray<T>::CArray(int cap)
+CArray::CArray(int cap)
     : capacity(cap)
     , size(0)
 {
-    buffer = new T[capacity];
+    buffer = new int[capacity];
 }
 
-template<class T>
-CArray<T>::~CArray()
+CArray::~CArray()
 {
     delete[] buffer;
 }
 
-template<class T>
-void CArray<T>::Add(T elem)
+void CArray::Add(int elem)
 {
     if ( size == capacity )
         Reallocate();
     buffer[size++] = elem;
 }
 
-template<class T>
-void CArray<T>::Reallocate()
+void CArray::Reallocate()
 {
     int new_capacity = capacity * 2;
-    T* new_buffer = new T[new_capacity];
+    int* new_buffer = new int[new_capacity];
     
     for ( int i = 0; i < capacity; i++ )
         new_buffer[i] = buffer[i];
@@ -137,8 +128,7 @@ void CArray<T>::Reallocate()
     capacity = new_capacity;
 }
 
-template<class T>
-T& CArray<T>::operator [](int index)
+int& CArray::operator [](int index)
 {
     assert(index >= 0 && index < size);
     return buffer[index];
