@@ -1,3 +1,7 @@
+
+
+
+
 /*
  *
  * author: a.pavlov
@@ -10,8 +14,7 @@
  */
 
 #include <iostream>
-#include <cmath>
-//#include <assert.h>
+#include <assert.h>
 
 //=====CArray=====
 template< class T >
@@ -70,25 +73,34 @@ private:
 };
 
 //=====POINT=====
+template< int bX = 0, int bY = 0 >
 class Point
 {
 public:
     Point();
     Point(int newX, int newY);
-    Point(const Point& point);
+    Point(const Point<bX,bY>& point);
     
     int getX() const { return x; }
     int getY() const { return y; }
-    int getBX() const { return baseX; }
-    int getBY() const { return baseY; }
-    void SetBase(int bX, int bY);
     
-    Point& operator=(const Point& point);
-    bool operator<(const Point& point);
-    bool operator<=(const Point& point);
-    bool operator==(const Point& point);
-    friend std::istream& operator>>(std::istream& stream, Point& p);
-    friend std::ostream& operator<<(std::ostream& stream, Point& p);
+    Point& operator= (const Point<bX,bY>& point);
+    bool operator< (const Point<bX,bY>& point);
+    bool operator<= (const Point<bX,bY>& point);
+    bool operator== (const Point<bX,bY>& point);
+    friend std::istream& operator>> (std::istream& stream, Point<bX,bY>& p)
+    {
+        int x = 0, y = 0;
+        stream >> x >> y;
+        Point<bX,bY> newP(x, y);
+        p = newP;
+        return stream;
+    }
+    friend std::ostream& operator<< (std::ostream& stream, Point<bX,bY>& p)
+    {
+        stream << p.getX() << " " << p.getY();
+        return stream;
+    }
     
 private:
     int x;
@@ -103,53 +115,34 @@ void inputArray(CArray<T>& arr);
 template< class T >
 void heapSort(CArray<T>& arr);
 
-int findFirst(CArray<Point>& arr);
-
-void checkLast(CArray<Point>& arr);
+int findFirst(CArray< Point<> >& arr);
 
 //================ MAIN ========================
 
 int main()
 {
-    CArray<Point> arr;
+    CArray< Point<> > arr;
     inputArray(arr);
     
     int minPoint = findFirst(arr);
-    int minX = arr[minPoint].getX();
-    int minY = arr[minPoint].getY();
     arr.DeleteAt(minPoint);
     
-    for ( int i = 0; i < arr.GetSize(); ++i )
-        arr[i].SetBase(minX, minY);
+    const int minX = arr[minPoint].getX();
+    const int minY = arr[minPoint].getY();
     
-    heapSort(arr);
+    CArray< Point<minX, minY> > newArr;
     
-    checkLast(arr);
+    heapSort(newArr);
     
-    std::cout << minX << " " << minY << std::endl;
-    for ( int i = 0; i < arr.GetSize(); ++i )
-        std::cout << arr[i] << std::endl;
+    for ( int i = 0; i < newArr.GetSize(); ++i )
+        std::cout << newArr[i] << std::endl;
     
     return 0;
 }
 
 //===============================================
 
-void checkLast(CArray<Point>& arr)
-{
-    int last = arr.GetSize() - 1;
-    int x = arr[last].getX();
-    int y = arr[last].getY();
-    int x1 = arr[last - 1].getX();
-    int y1 = arr[last - 1].getY();
-    int baseX = arr[0].getBX();
-    int baseY = arr[0].getBY();
-    
-    if ( (y - baseY)/(x - baseX) == (y1 - baseY)/(x1 - baseX) )
-        std::swap(arr[last], arr[last - 1]);
-}
-
-int findFirst(CArray<Point>& arr)
+int findFirst(CArray< Point<> >& arr)
 {
     int min = 0;
     for ( int i = 1; i < arr.GetSize(); ++i )
@@ -169,7 +162,7 @@ void inputArray(CArray<T>& arr)
 {
     int n = 0;
     std::cin >> n;
-    Point p;
+    T p;
     for ( int i = 0; i < n; ++i )
     {
         std::cin >> p;
@@ -282,109 +275,75 @@ T Heap<T>::ExtractMin()
 }
 
 
-
-Point::Point()
+template< int bX, int bY>
+Point<bX,bY>::Point()
     : x(0)
     , y(0)
 {
 }
 
-Point::Point(int newX, int newY)
+template< int bX, int bY>
+Point<bX,bY>::Point(int newX, int newY)
     : x(newX)
     , y(newY)
 {
 }
 
-Point::Point(const Point& point)
+template< int bX, int bY>
+Point<bX,bY>::Point(const Point<bX,bY>& point)
     : x(point.getX())
     , y(point.getY())
-    , baseX(point.getBX())
-    , baseY(point.getBY())
 {
 }
 
-void Point::SetBase(int bX, int bY)
-{
-    baseX = bX;
-    baseY = bY;
-}
-
-Point& Point::operator=(const Point& point)
+template< int bX, int bY>
+Point<bX,bY>& Point<bX,bY>::operator=(const Point<bX,bY>& point)
 {
     x = point.getX();
     y = point.getY();
-    baseX = point.getBX();
-    baseY = point.getBY();
     return *this;
 }
 
-bool Point::operator<(const Point &point)
+template< int bX, int bY>
+bool Point<bX,bY>::operator<(const Point<bX,bY> &point)
 {
-    /*
-    if ( (x - baseX) == 0 )
-    {
-        if ( (point.getX() - baseX) == 0 )
-            return false;
-        else
-            return true;
-    }
-    if ( (point.getX() - baseX) == 0 )
-        return false;
-    //int tg1 = (y - baseY)/(x - baseX);
-    */
-    if ( atan2((y - baseY), (x - baseX)) > atan2((point.getY() - baseY), (point.getX() - baseX)) )
-        return true;
-    else
-        if ( atan2((y - baseY), (x - baseX)) == atan2((point.getY() - baseY), (point.getX() - baseX)) )
-        {
-            double dist1 = (y - baseY)*(y - baseY) - (x - baseX)*(x - baseX);
-            double dist2 = (point.getY() - baseY)*(point.getY() - baseY) - (point.getX() - baseX)*(point.getX() - baseX);
-            return dist1 < dist2;
-        }
-    return false;
+    if ( x == point.getX() )
+        return ( y < point.getY() );
+    return ( x < point.getX() );
 }
 
-bool Point::operator<=(const Point &point)
+template< int bX, int bY>
+bool Point<bX,bY>::operator<=(const Point<bX,bY> &point)
 {
     if ( (*this) < point || (*this) == point )
         return true;
     return false;
 }
 
-bool Point::operator==(const Point &point)
+template< int bX, int bY>
+bool Point<bX,bY>::operator==(const Point<bX,bY> &point)
 {
-    if ( (x - baseX) == 0 )
-    {
-        if ( (point.getX() - baseX) == 0 )
-            return true;
-        else
-            return false;
-    }
-    if ( (point.getX() - baseX) == 0 )
-    {
-        if ( (x - baseX) == 0 )
-            return true;
-        else
-            return false;
-    }
-    bool is = (y - baseY)/(x - baseX) == (point.getY() - baseY)/(point.getX() - baseX);
-    return is;
+    return ( x == point.getX() && y == point.getY() );
 }
 
-std::istream& operator>>(std::istream& stream, Point& p)
+/*
+template< int bX, int bY>
+std::istream& operator>>(std::istream& stream, Point<bX,bY>& p)
 {
     int x = 0, y = 0;
     stream >> x >> y;
-    Point newP(x, y);
+    Point<bX,bY> newP(x, y);
     p = newP;
     return stream;
 }
 
-std::ostream& operator<<(std::ostream& stream, Point& p)
+template< int bX, int bY>
+std::ostream& operator<<(std::ostream& stream, Point<bX,bY>& p)
 {
     stream << p.getX() << " " << p.getY();
     return stream;
 }
+*/
 
 template< class T >
 CArray<T>::CArray(int cap)
@@ -436,6 +395,6 @@ void CArray<T>::Reallocate()
 template<class T>
 T& CArray<T>::operator [](int index)
 {
-    //assert(index >= 0 && index < size);
+    assert(index >= 0 && index < size);
     return buffer[index];
 }
