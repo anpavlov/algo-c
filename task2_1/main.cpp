@@ -50,7 +50,7 @@ void outputArray(CArray<T>& arr);
 
 //============= MAIN =========================
 
-int abc()
+int main()
 {
     CArray<int> arr;
     inputIntArray(arr);
