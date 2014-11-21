@@ -13,7 +13,6 @@
  */
 
 #include <cstdio>
-#include <algorithm>
 
 template< class T >
 class CArray
@@ -64,13 +63,14 @@ void charSort(CArray<char*>& arr, int nbyte, int start, int end)
 {
     if ( end - start == 0 )
         return;
-    char minValue = arr[start][nbyte];
-	char maxValue = arr[start][nbyte];
+    
+    char minValue = *(arr[start] + nbyte);
+	char maxValue = *(arr[start] + nbyte);
     if ( minValue == 0 && maxValue == 0 )
         return;
 	for( int i = start; i <= end; ++i ) {
-		minValue = std::min(minValue, arr[i][nbyte]);
-		maxValue = std::max(maxValue, arr[i][nbyte]);
+		if ( *(arr[i] + nbyte) < minValue ) minValue = *(arr[i] + nbyte);
+		if ( *(arr[i] + nbyte) > maxValue ) maxValue = *(arr[i] + nbyte);
 	}
 	int valuesCount = maxValue - minValue + 1;
 	int* valuesData = new int[valuesCount];
@@ -79,18 +79,10 @@ void charSort(CArray<char*>& arr, int nbyte, int start, int end)
 	}
 
 	for( int i = start; i <= end; ++i ) {
-        int ind = arr[i][nbyte] - minValue;
+        int ind = *(arr[i] + nbyte) - minValue;
 		valuesData[ind]++;
 	}
 
-/*	int index = 0;
-	for( int i = 0; i < valuesCount; i++ ) {
-		for( int j = 0; j < valuesData[i]; j++ ) {
-			data[index] = minValue + i;
-			index++;
-		}
-	}*/
-    
     int* valuesData_t = new int[valuesCount];
     valuesData_t[0] = valuesData[0];
 
@@ -102,7 +94,7 @@ void charSort(CArray<char*>& arr, int nbyte, int start, int end)
 	char** tempData = new char*[end - start + 1];
 
 	for( int i = end - start; i >= start; --i ) {
-		char value = arr[i][nbyte] - minValue;
+		int value = *(arr[i] + nbyte) - minValue;
 		valuesData[value]--;
         int ind = valuesData[value];
 		tempData[ind] = arr[i];
@@ -113,12 +105,12 @@ void charSort(CArray<char*>& arr, int nbyte, int start, int end)
 	}
     
     int new_start = start;
-    int new_end = valuesData_t[0] - 1;
+    int new_end = start + valuesData_t[0] - 1;
     for ( int i = 0; i < valuesCount - 1; ++i )
     {
         charSort(arr, nbyte + 1, new_start, new_end);
         new_start = new_end + 1;
-        new_end = valuesData_t[i + 1] - 1;
+        new_end = start + valuesData_t[i + 1] - 1;
     }
     new_start = valuesData_t[valuesCount - 1] - 1;
     new_end = end;
