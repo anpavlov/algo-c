@@ -72,10 +72,10 @@ void inputIntArray(CArray<int>& arr);
 
 int main()
 {
-    CArray<int> arr(26000000);
+    CArray<int> arr(25000000);
     inputIntArray(arr);
     
-    qs(arr, 0, arr.GetSize() - 1);
+    optiSort(arr);
     
     for (int i = 9; i < arr.GetSize(); i += 10)
     //for (int i = 0; i < arr.GetSize(); i++)
@@ -95,23 +95,29 @@ void optiSort(CArray<T>& arr)
 {
     Stack<int> stack;
     
-    int start = 0;
+    int first = 0;
     int last = arr.GetSize() - 1;
-    stack.Push(start);
+    stack.Push(first);
     stack.Push(last);
     int p = 0;
     
     while ( !(stack.IsEmpty()) )
     {
         last = stack.Pop();
-        start = stack.Pop();
+        first = stack.Pop();
         
         p = partition(arr, first, last, 0);
      
         if ( p < last )
-            qs(arr, p + 1, last);
+        {
+            stack.Push(p + 1);
+            stack.Push(last);
+        }
         if (first < p - 1)
-            qs(arr, first, p - 1);
+        {
+            stack.Push(first);
+            stack.Push(p - 1);
+        }
     }
 }
 
@@ -260,7 +266,7 @@ template< class T >
 void Stack<T>::ReAllocate()
 {
     int new_capacity = capacity * 2;
-    char* new_buffer = new T[new_capacity];
+    T* new_buffer = new T[new_capacity];
     
     for ( int i = 0; i < capacity; i++ )
         new_buffer[i] = buffer[i];
