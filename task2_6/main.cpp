@@ -64,14 +64,17 @@ void charSort(CArray<char*>& arr, int nbyte, int start, int end)
     if ( end - start == 0 )
         return;
     
-    char minValue = *(arr[start] + nbyte);
-	char maxValue = *(arr[start] + nbyte);
+    char minValue = arr[start][nbyte];
+	char maxValue = arr[start][nbyte];
+    
+	for( int i = start; i <= end; ++i ) {
+		if ( arr[i][nbyte] < minValue ) minValue = arr[i][nbyte];
+		if ( arr[i][nbyte] > maxValue ) maxValue = arr[i][nbyte];
+	}
     if ( minValue == 0 && maxValue == 0 )
         return;
-	for( int i = start; i <= end; ++i ) {
-		if ( *(arr[i] + nbyte) < minValue ) minValue = *(arr[i] + nbyte);
-		if ( *(arr[i] + nbyte) > maxValue ) maxValue = *(arr[i] + nbyte);
-	}
+    if ( minValue == 0 )
+        minValue = 'a' - 1;
 	int valuesCount = maxValue - minValue + 1;
 	int* valuesData = new int[valuesCount];
 	for( int i = 0; i < valuesCount; i++ ) {
@@ -79,7 +82,9 @@ void charSort(CArray<char*>& arr, int nbyte, int start, int end)
 	}
 
 	for( int i = start; i <= end; ++i ) {
-        int ind = *(arr[i] + nbyte) - minValue;
+        int ind = 0;
+        if ( arr[i][nbyte] != 0 )
+            ind = arr[i][nbyte] - minValue;
 		valuesData[ind]++;
 	}
 
@@ -93,8 +98,10 @@ void charSort(CArray<char*>& arr, int nbyte, int start, int end)
 
 	char** tempData = new char*[end - start + 1];
 
-	for( int i = end - start; i >= start; --i ) {
-		int value = *(arr[i] + nbyte) - minValue;
+	for( int i = end; i >= start; --i ) {
+        int value = 0;
+        if ( arr[i][nbyte] != 0 )
+            value = arr[i][nbyte] - minValue;
 		valuesData[value]--;
         int ind = valuesData[value];
 		tempData[ind] = arr[i];
@@ -110,11 +117,16 @@ void charSort(CArray<char*>& arr, int nbyte, int start, int end)
     {
         charSort(arr, nbyte + 1, new_start, new_end);
         new_start = new_end + 1;
+        while ( valuesData_t[i + 1] == valuesData_t[i] )
+            ++i;
         new_end = start + valuesData_t[i + 1] - 1;
     }
-    new_start = valuesData_t[valuesCount - 1] - 1;
-    new_end = end;
-    charSort(arr, nbyte + 1, new_start, new_end);
+    if ( valuesCount > 1 )
+    {
+        charSort(arr, nbyte + 1, new_start, new_end);
+    }
+    else
+        charSort(arr, nbyte + 1, new_start, new_end);
 
 	delete [] tempData;
 	delete [] valuesData;
@@ -133,11 +145,12 @@ void outputArr(CArray<char*>& arr)
 
 void inputStrArray(CArray<char*>& arr)
 {
-    char* temp = new char[500];
+    int size = 300;
+    char* temp = new char[size];
     while ( scanf("%s", temp) == 1 )
     {
         arr.Add(temp);
-        temp = new char[500];
+        temp = new char[size];
     }
 }
 
