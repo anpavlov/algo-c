@@ -60,13 +60,16 @@ private:
 };
 
 template< class T >
-void qs(CArray<T>& arr, int first, int last);
-
-template< class T >
 void optiSort(CArray<T>& arr);
 
 template< class T >
 int partition(CArray<T>& arr, int start, int end, int pivot);
+
+template< class T >
+int findMedian(CArray<T>& arr, int start, int end, int step);
+
+template< class T >
+void bubbleSort(CArray<T>& arr, int start, int last, int step = 1);
 
 void inputIntArray(CArray<int>& arr);
 
@@ -76,6 +79,7 @@ int main()
     inputIntArray(arr);
     
     optiSort(arr);
+    //bubbleSort(arr, 0, arr.GetSize() - 1, 2);
     
     for (int i = 9; i < arr.GetSize(); i += 10)
     //for (int i = 0; i < arr.GetSize(); i++)
@@ -106,7 +110,8 @@ void optiSort(CArray<T>& arr)
         last = stack.Pop();
         first = stack.Pop();
         
-        p = partition(arr, first, last, 0);
+        p = findMedian(arr, first, last);
+        p = partition(arr, first, last, p);
      
         if ( p < last )
         {
@@ -119,6 +124,32 @@ void optiSort(CArray<T>& arr)
             stack.Push(p - 1);
         }
     }
+}
+
+template< class T >
+int findMedian(CArray<T>& arr, int start, int end)
+{
+    int first = start;
+    int last = end;
+    int step = 1;
+    
+    while ( 1 )
+    {
+        
+        for ( int i = first; i + 4 * step <= last; i += 5 * step )
+            bubbleSort(arr, i, i + 4 * step, step);
+        
+        if ( (last - first)/step + 1 <= 5 )
+            break;
+        
+        first += 2 * step;
+        last -= 2 * step;
+        step *= 5;
+        
+    }
+    
+    int ret = first + step * 2;
+    return ret;
 }
 
 inline void inputIntArray(CArray<int>& arr)
@@ -157,6 +188,24 @@ inline int partition(CArray<T>& arr, int start, int end, int pivot)
     swap(arr[i], arr[pivot]);
     pivot = i;
     return pivot;
+}
+
+template< class T >
+void bubbleSort(CArray<T>& arr, int start, int last, int step)
+{
+    //int swaps = 0;
+    for ( int i = start; i < last; i += step )
+    {
+        //swaps = 0;
+        for ( int j = start; j < last - i; j += step )
+            if ( arr[j] > arr[j + step] )
+            {
+                swap(arr[j], arr[j + step]);
+                //swaps = 1;
+            }
+        //if ( swaps == 0)
+            //break;
+    }
 }
 
 // ======= CArray ==========
