@@ -2,7 +2,7 @@
 #include <vector>
 #include <string>
 
-#define INITINAL_SIZE 2
+#define INITINAL_SIZE 8
 #define GROW_FACTOR 2
 #define DELETED "!deleted"
 
@@ -138,7 +138,7 @@ bool CHashTable<T>::has(const T& data, int hashVal, int& where) const
 template< class T >
 int CHashTable<T>::hash(int hashVal, int p) const
 {
-    return hashVal + p / 2 + p * p / 2;
+    return (hashVal + p / 2 + p * p / 2) % table.capacity();
 }
 
 template< class T >
@@ -146,13 +146,22 @@ void CHashTable<T>::growTable()
 {
     vector<T> newTable(table.capacity() * GROW_FACTOR);
     int hashVal;
-    int where;
+    int where, p, index;
     for ( int i = 0; i < table.capacity(); ++i )
         if ( table[i] != "" && table[i] != DELETED )
         {            
             hashVal = Hash(table[i], newTable.capacity());
             
-            has(table[i], hashVal, where);
+            p = 1;
+            index = hashVal;
+            where = -1;
+            while ( newTable[index] != "" )
+            {
+                index = hash(hashVal, ++p);
+                if ( index > newTable.capacity() - 1 )
+                    index = index % newTable.capacity();
+            } 
+            where = index;
             
             newTable[where] = table[i];
         }
